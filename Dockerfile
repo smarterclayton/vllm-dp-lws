@@ -177,7 +177,7 @@ RUN export CC=/usr/bin/mpicc CXX=/usr/bin/mpicxx \
     && wget https://developer.nvidia.com/downloads/assets/secure/nvshmem/nvshmem_src_${NVSHMEM_VERSION}.txz \
     && tar -xf nvshmem_src_${NVSHMEM_VERSION}.txz \
     && cd nvshmem_src \
-    && git apply /tmp/cks_nvshmem.patch \
+  # && git apply /tmp/cks_nvshmem.patch \
     && mkdir build \
     && cd build \
     && cmake \
@@ -238,7 +238,7 @@ RUN export CC=/usr/bin/mpicc CXX=/usr/bin/mpicxx \
     && tar -xf nvshmem_src_${NVSHMEM_VERSION}.txz \
     && cd nvshmem_src \
     && git apply /app/DeepEP/third-party/nvshmem.patch \
-    && git apply /tmp/cks_nvshmem.patch \
+  # && git apply /tmp/cks_nvshmem.patch \
     && mkdir build \
     && cd build \
     && cmake \
