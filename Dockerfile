@@ -17,7 +17,7 @@ ENV GDRCOPY_HOME=/usr/local
 ENV NIXL_VERSION="0.2.1"
 ENV NIXL_SOURCE_DIR=/opt/nixl
 ENV NIXL_PREFIX=/usr/local/nixl
-ENV NVSHMEM_VERSION=3.2.5-1
+ENV NVSHMEM_VERSION=3.3.9
 ENV NVSHMEM_PREFIX=/opt/nvshmem-${NVSHMEM_VERSION}
 ENV TORCH_CUDA_ARCH_LIST="9.0a 10.0"
 ENV CMAKE_CUDA_ARCHITECTURES="90a;100"
@@ -54,6 +54,8 @@ RUN echo 'tzdata tzdata/Areas select America' | debconf-set-selections \
       libopenmpi-dev openmpi-bin \
       libpmix-dev libfabric-dev \
       datacenter-gpu-manager \
+      # Allow NVSHMEM to build nvshmem4py
+      python3.10-venv python3.10-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -173,14 +175,12 @@ ENV CPATH=${MPI_HOME}/include:${CPATH}
 # First clone DeepEP for its nvshmem patch.
 RUN git clone --depth=1 "https://github.com/deepseek-ai/DeepEP.git" "/app/DeepEP"
 
-
-# Apply DeepEP's nvshmem.patch and then build NVSHMEM
+# BUILD nvshmem
 RUN export CC=/usr/bin/mpicc CXX=/usr/bin/mpicxx \
     && cd /tmp \
-    && wget https://developer.nvidia.com/downloads/assets/secure/nvshmem/nvshmem_src_${NVSHMEM_VERSION}.txz \
-    && tar -xf nvshmem_src_${NVSHMEM_VERSION}.txz \
+    && wget https://developer.nvidia.com/downloads/assets/secure/nvshmem/nvshmem_src_cuda12-all \
+    && tar -xzf nvshmem_src_cuda12-all \
     && cd nvshmem_src \
-    && git apply /app/DeepEP/third-party/nvshmem.patch \
     && mkdir -p build \
     && cd build \
     && cmake \
