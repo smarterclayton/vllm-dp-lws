@@ -159,64 +159,6 @@ RUN cd /tmp/install-scripts \
 ENV APPIMAGE_EXTRACT_AND_RUN=1
 
 ENTRYPOINT ["/app/code/venv/bin/vllm", "serve"]
-#==============================================================================
-
-# TODO(tms): Unify pplx and DeepEP images.
-# Major difference is the DeepEP patch for NVSHMEM that we only apply
-# in the DeepEP case for now.
-FROM base AS pplx 
-
-# --- Build and Install NVSHMEM from Source ---
-ENV MPI_HOME=/usr/lib/x86_64-linux-gnu/openmpi
-ENV CPATH=${MPI_HOME}/include:${CPATH}
-
-COPY cks_nvshmem.patch /tmp/cks_nvshmem.patch
-
-RUN export CC=/usr/bin/mpicc CXX=/usr/bin/mpicxx \
-    && cd /tmp \
-    && wget https://developer.nvidia.com/downloads/assets/secure/nvshmem/nvshmem_src_${NVSHMEM_VERSION}.txz \
-    && tar -xf nvshmem_src_${NVSHMEM_VERSION}.txz \
-    && cd nvshmem_src \
-  # && git apply /tmp/cks_nvshmem.patch \
-    && mkdir build \
-    && cd build \
-    && cmake \
-      -G Ninja \
-      -DNVSHMEM_PREFIX=${NVSHMEM_PREFIX} \
-      -DCMAKE_CUDA_ARCHITECTURES="90a"   \
-      -DNVSHMEM_PMIX_SUPPORT=0           \
-      -DNVSHMEM_LIBFABRIC_SUPPORT=0      \
-      -DNVSHMEM_IBRC_SUPPORT=1           \
-      -DNVSHMEM_IBGDA_SUPPORT=1          \
-      -DNVSHMEM_IBDEVX_SUPPORT=1         \
-      -DNVSHMEM_SHMEM_SUPPORT=0          \
-      -DNVSHMEM_USE_GDRCOPY=1            \
-      -DNVSHMEM_MPI_SUPPORT=1            \
-      -DNVSHMEM_USE_NCCL=0               \
-      -DNVSHMEM_BUILD_TESTS=1            \
-      -DNVSHMEM_BUILD_EXAMPLES=0         \
-      -DGDRCOPY_HOME=${GDRCOPY_HOME}     \
-      -DNVSHMEM_MPI_SUPPORT=1            \
-      -DNVSHMEM_DISABLE_CUDA_VMM=1       \
-      .. \
-    && ninja -j${MAX_JOBS} \
-    && ninja -j${MAX_JOBS} install \
-    && rm -rf /tmp/nvshmem_src_${NVSHMEM_VERSION}* \
-    && rm /tmp/cks_nvshmem.patch
-
-ENV PATH=${NVSHMEM_PREFIX}/bin:${PATH}
-ENV LD_LIBRARY_PATH=${NVSHMEM_PREFIX}/lib:${LD_LIBRARY_PATH}
-ENV CPATH=${NVSHMEM_PREFIX}/include:${CPATH}
-ENV LIBRARY_PATH=${NVSHMEM_PREFIX}/lib:${LIBRARY_PATH}
-ENV PKG_CONFIG_PATH=${NVSHMEM_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}
-
-# Install PPLX python package
-RUN cd /tmp/install-scripts \
-    && ./pplx.sh \
-    && ./deepgemm.sh
-RUN rm -r /tmp/install-scripts
-
-ENTRYPOINT ["/app/code/venv/bin/vllm", "serve"]
 
 #==============================================================================
 
@@ -228,7 +170,6 @@ ENV CPATH=${MPI_HOME}/include:${CPATH}
 
 # First clone DeepEP for its nvshmem patch.
 RUN git clone --depth=1 "https://github.com/deepseek-ai/DeepEP.git" "/app/DeepEP"
-COPY cks_nvshmem.patch /tmp/cks_nvshmem.patch
 
 
 # Apply DeepEP's nvshmem.patch and then build NVSHMEM
@@ -238,13 +179,12 @@ RUN export CC=/usr/bin/mpicc CXX=/usr/bin/mpicxx \
     && tar -xf nvshmem_src_${NVSHMEM_VERSION}.txz \
     && cd nvshmem_src \
     && git apply /app/DeepEP/third-party/nvshmem.patch \
-  # && git apply /tmp/cks_nvshmem.patch \
-    && mkdir build \
+    && mkdir -p build \
     && cd build \
     && cmake \
       -G Ninja \
       -DNVSHMEM_PREFIX=${NVSHMEM_PREFIX} \
-      -DCMAKE_CUDA_ARCHITECTURES="90a"   \
+      -DCMAKE_CUDA_ARCHITECTURES="90a;100" \
       -DNVSHMEM_PMIX_SUPPORT=0           \
       -DNVSHMEM_LIBFABRIC_SUPPORT=1      \
       -DNVSHMEM_IBRC_SUPPORT=1           \
@@ -263,8 +203,7 @@ RUN export CC=/usr/bin/mpicc CXX=/usr/bin/mpicxx \
       .. \
     && ninja -j${MAX_JOBS} \
     && ninja -j${MAX_JOBS} install \
-    && rm -rf /tmp/nvshmem_src_${NVSHMEM_VERSION}* \
-    && rm /tmp/cks_nvshmem.patch
+    && rm -rf /tmp/nvshmem_src_${NVSHMEM_VERSION}*
 
 ENV PATH=${NVSHMEM_PREFIX}/bin:${PATH}
 ENV LD_LIBRARY_PATH=${NVSHMEM_PREFIX}/lib:${LD_LIBRARY_PATH}
