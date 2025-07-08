@@ -21,10 +21,11 @@ echo "Python version      : ${PYTHON_VERSION}"
 echo "Virtualenv path     : ${VENV_PATH}"
 echo "uv binary           : ${UV}"
 echo "vLLM repo / branch  : ${VLLM_REPO_URL}  (${VLLM_BRANCH})"
+echo "vLLM commit         : ${VLLM_COMMIT:-<latest>}"
 echo "====================================================================="
 
 ################################  vLLM  ######################################
-clone_or_update "${VLLM_REPO_URL}" "${VLLM_SOURCE_DIR}" "${VLLM_BRANCH}"
+clone_or_update "${VLLM_REPO_URL}" "${VLLM_SOURCE_DIR}" "${VLLM_BRANCH}" "${VLLM_COMMIT:-}"
 
 banner "Installing vLLM (editable)"
 pushd "${VLLM_SOURCE_DIR}" >/dev/null

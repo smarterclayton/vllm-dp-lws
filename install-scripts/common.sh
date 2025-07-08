@@ -26,7 +26,7 @@ upip() { "${UV}" pip install --python "${PYTHON}" --no-progress --no-cache-dir -
 
 # Clone the repo if missing, otherwise fast-forward to the requested branch
 clone_or_update() {
-  local url=$1 dir=$2 branch=${3:-main}
+  local url=$1 dir=$2 branch=${3:-main} commit=${4:-}
   if [[ -d "${dir}/.git" ]]; then
     banner "Updating $(basename "${dir}")"
     git -C "${dir}" fetch --depth=1 origin "${branch}"
@@ -36,5 +36,9 @@ clone_or_update() {
   else
     banner "Cloning $(basename "${dir}")"
     git clone --depth=1 --recursive --branch "${branch}" "${url}" "${dir}"
+  fi
+  if [[ -n "${commit}" ]]; then
+    git -C "${dir}" fetch --unshallow origin "${branch}"
+    git -C "${dir}" checkout "${commit}"
   fi
 }
