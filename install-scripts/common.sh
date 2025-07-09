@@ -16,9 +16,6 @@ PATH="${VENV_PATH}/bin:${PATH}"
 command -v git   >/dev/null || { echo "git not found";   exit 1; }
 command -v "${UV}" >/dev/null || { echo "uv not found at ${UV}"; exit 1; }
 
-# Build-time env
-export TORCH_CUDA_ARCH_LIST="9.0a+PTX"
-
 banner() { printf '\n========== %s ==========\n' "$*"; }
 
 # Re-usable “uv pip install” wrapper (adds --no-cache-dir by default)
