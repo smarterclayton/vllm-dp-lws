@@ -150,11 +150,11 @@ RUN curl -LsSf https://astral.sh/uv/install.sh \
 RUN rm /etc/libibverbs.d/vmw_pvrdma.driver
 
 # Grab install scripts
-COPY install-scripts/ /tmp/install-scripts/
-RUN chmod +x /tmp/install-scripts/*.sh
+COPY install-scripts/ /install-scripts/
+RUN chmod +x /install-scripts/*.sh
 
 # Install dependencies & NIXL (python)
-RUN cd /tmp/install-scripts \
+RUN cd /install-scripts \
     && ./base-deps.sh
 
 # For neovim.appimage
@@ -214,9 +214,8 @@ ENV LIBRARY_PATH=${NVSHMEM_PREFIX}/lib:${LIBRARY_PATH}
 ENV PKG_CONFIG_PATH=${NVSHMEM_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}
 
 # Install DeepEP python package
-RUN cd /tmp/install-scripts  \
+RUN cd /install-scripts  \
     && ./deepep.sh \
     && ./deepgemm.sh
-RUN rm -r /tmp/install-scripts
 
 ENTRYPOINT ["/app/code/venv/bin/vllm", "serve"]
