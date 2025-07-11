@@ -26,6 +26,10 @@ clone_or_update() {
   local url=$1 dir=$2 branch=${3:-main} commit=${4:-}
   if [[ -d "${dir}/.git" ]]; then
     banner "Updating $(basename "${dir}")"
+    if [[ ! "$(git -C "${dir}" remote get-url origin)" == "${url}" ]]; then
+      git -C "${dir}" remote set-url origin "${url}"
+      git -C "${dir}" remote set-branches --add origin "${branch}"
+    fi
     git -C "${dir}" fetch --depth=1 origin "${branch}"
     git -C "${dir}" checkout "${branch}"
     git -C "${dir}" reset --hard "origin/${branch}"

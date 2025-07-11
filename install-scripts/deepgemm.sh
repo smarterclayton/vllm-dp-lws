@@ -6,8 +6,10 @@
 SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" && pwd  )"
 source ${SCRIPT_DIR}/common.sh
 
-DEEPGEMM_SOURCE_DIR="/app/DeepGEMM"
-DEEPGEMM_REPO_URL="https://github.com/deepseek-ai/DeepGEMM"
+DEEPGEMM_SOURCE_DIR="${DEEPGEMM_SOURCE_DIR:-/app/DeepGEMM}"
+DEEPGEMM_REPO_URL="${DEEPGEMM_REPO_URL:-https://github.com/deepseek-ai/DeepGEMM}"
+DEEPGEMM_BRANCH="${DEEPGEMM_BRANCH:-}"
+DEEPGEMM_COMMIT="${DEEPGEMM_COMMIT:-}"
 
 banner "Environment summary"
 echo "Python version      : ${PYTHON_VERSION}"
@@ -19,7 +21,7 @@ echo "====================================================================="
 # Dependencies
 upip cuda-python
 
-clone_or_update "${DEEPGEMM_REPO_URL}" "${DEEPGEMM_SOURCE_DIR}" "${DEEPGEMM_BRANCH:-}" "${DEEP_GEMM_COMMIT:-}"
+clone_or_update "${DEEPGEMM_REPO_URL}" "${DEEPGEMM_SOURCE_DIR}" "${DEEPGEMM_BRANCH}" "${DEEPGEMM_COMMIT}"
 pushd "${DEEPGEMM_SOURCE_DIR}" >/dev/null
 git submodule update --init --recursive
 "${PYTHON}" setup.py install
