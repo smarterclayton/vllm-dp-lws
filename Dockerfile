@@ -213,9 +213,10 @@ ENV CPATH=${NVSHMEM_PREFIX}/include:${CPATH}
 ENV LIBRARY_PATH=${NVSHMEM_PREFIX}/lib:${LIBRARY_PATH}
 ENV PKG_CONFIG_PATH=${NVSHMEM_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}
 
-# Install DeepEP python package
+# Install our dependencies
 RUN cd /install-scripts  \
     && ./deepep.sh \
-    && ./deepgemm.sh
+    && ./deepgemm.sh \
+    && ./vllm.sh
 
 ENTRYPOINT ["/app/code/venv/bin/vllm", "serve"]
