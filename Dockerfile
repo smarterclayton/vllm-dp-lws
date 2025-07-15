@@ -185,6 +185,7 @@ RUN export CC=/usr/bin/mpicc CXX=/usr/bin/mpicxx \
     && cd build \
     && cmake \
       -G Ninja \
+      -DCMAKE_BUILD_TYPE=RelWithDebInfo \
       -DNVSHMEM_PREFIX=${NVSHMEM_PREFIX} \
       -DCMAKE_CUDA_ARCHITECTURES=${CMAKE_CUDA_ARCHITECTURES} \
       -DNVSHMEM_PMIX_SUPPORT=0           \
