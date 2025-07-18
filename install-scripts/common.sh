@@ -33,13 +33,14 @@ clone_or_update() {
     git -C "${dir}" fetch --depth=1 origin "${branch}"
     git -C "${dir}" checkout "${branch}"
     git -C "${dir}" reset --hard "origin/${branch}"
-    git -C "${dir}" submodule update --init --recursive
   else
     banner "Cloning $(basename "${dir}")"
-    git clone --depth=1 --recursive --branch "${branch}" "${url}" "${dir}"
+    git clone --depth=1 --branch "${branch}" "${url}" "${dir}"
   fi
   if [[ -n "${commit}" ]]; then
     git -C "${dir}" fetch --unshallow origin "${branch}"
     git -C "${dir}" checkout "${commit}"
   fi
+  git config --global url."https://github.com/".insteadOf git@github.com:
+  git -C "${dir}" submodule update --init --recursive
 }

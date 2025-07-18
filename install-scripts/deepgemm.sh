@@ -7,7 +7,7 @@ SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" && pwd  )"
 source ${SCRIPT_DIR}/common.sh
 
 DEEPGEMM_SOURCE_DIR="${DEEPGEMM_SOURCE_DIR:-/app/DeepGEMM}"
-DEEPGEMM_REPO_URL="${DEEPGEMM_REPO_URL:-https://github.com/deepseek-ai/DeepGEMM}"
+DEEPGEMM_REPO_URL="${DEEPGEMM_REPO_URL:-https://github.com/deepseek-ai/DeepGEMM.git}"
 DEEPGEMM_BRANCH="${DEEPGEMM_BRANCH:-}"
 DEEPGEMM_COMMIT="${DEEPGEMM_COMMIT:-}"
 
