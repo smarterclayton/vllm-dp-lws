@@ -18,9 +18,6 @@ echo "====================================================================="
 
 clone_or_update "${DEEPEP_URL}" "${DEEPEP_SOURCE_DIR}"
 
-# dependency to ensure we have cu128
-VIRTUAL_ENV=${VENV_PATH} uv pip install torch==2.7.1+cu128 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
-
 banner "Building and installing DeepEP"
 pushd "${DEEPEP_SOURCE_DIR}" >/dev/null
 # Build + install in one go (pip will make a wheel under the hood)

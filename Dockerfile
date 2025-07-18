@@ -217,6 +217,6 @@ ENV PKG_CONFIG_PATH=${NVSHMEM_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}
 RUN cd /install-scripts  \
     && ./deepep.sh \
     && ./deepgemm.sh \
-    && ./vllm.sh
+    && VLLM_USE_PRECOMPILED=1 ./vllm.sh
 
 ENTRYPOINT ["/app/code/venv/bin/vllm", "serve"]

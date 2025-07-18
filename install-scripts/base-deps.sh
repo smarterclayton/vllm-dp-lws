@@ -30,6 +30,9 @@ export PATH="${VENV_PATH}/bin:${PATH}"
 banner "Installing base Python deps"
 upip pandas datasets rust-just regex setuptools-scm cmake
 
+banner "Installing torch"
+upip torch torchvision torchaudio
+
 banner "Installing NIXL"
 upip "${NIXL_SOURCE_DIR}"
 
