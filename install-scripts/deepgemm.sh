@@ -24,5 +24,11 @@ upip cuda-python
 clone_or_update "${DEEPGEMM_REPO_URL}" "${DEEPGEMM_SOURCE_DIR}" "${DEEPGEMM_BRANCH}" "${DEEPGEMM_COMMIT}"
 pushd "${DEEPGEMM_SOURCE_DIR}" >/dev/null
 git submodule update --init --recursive
+
+"${UV}" pip uninstall --python "${PYTHON}" deep_gemm
 "${PYTHON}" setup.py install
+
+# Ensure deep-gemm is in pip, but avoid installing dependencies here to allow vLLM to manage them
+upip -e . --no-build-isolation
+
 popd >/dev/null

@@ -28,8 +28,8 @@ clone_or_update() {
     banner "Updating $(basename "${dir}")"
     if [[ ! "$(git -C "${dir}" remote get-url origin)" == "${url}" ]]; then
       git -C "${dir}" remote set-url origin "${url}"
-      git -C "${dir}" remote set-branches --add origin "${branch}"
     fi
+    git -C "${dir}" remote set-branches --add origin "${branch}"
     git -C "${dir}" fetch --depth=1 origin "${branch}"
     git -C "${dir}" checkout "${branch}"
     git -C "${dir}" reset --hard "origin/${branch}"

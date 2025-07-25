@@ -54,6 +54,13 @@ RUN echo 'tzdata tzdata/Areas select America' | debconf-set-selections \
       libopenmpi-dev openmpi-bin \
       libpmix-dev libfabric-dev \
       datacenter-gpu-manager \
+      # Debugging tools
+      kmod pciutils binutils \
+      gdb \
+      # If we need to debug Python
+      # python3.12-dbg \
+      # Should be included for GCP setup, uncomment if they go missing
+      libnl-3-200 libnl-route-3-200 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
