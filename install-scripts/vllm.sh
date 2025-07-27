@@ -30,6 +30,8 @@ clone_or_update "${VLLM_REPO_URL}" "${VLLM_SOURCE_DIR}" "${VLLM_BRANCH}" "${VLLM
 banner "Installing vLLM (editable)"
 pushd "${VLLM_SOURCE_DIR}" >/dev/null
 
+export VLLM_USE_PRECOMPILED="${VLLM_USE_PRECOMPILED:-1}"
+
 # TODO(tms): Work around for compressed_tensors bug in vLLM.
 # Remove when no longer needed
 upip accelerate
