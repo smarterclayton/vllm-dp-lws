@@ -222,9 +222,9 @@ ENV PKG_CONFIG_PATH=${NVSHMEM_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}
 
 # Install our dependencies
 RUN cd /install-scripts  \
+    && FLASHINFER_AOT=1 ./flashinfer.sh \
     && ./deepep.sh \
     && ./deepgemm.sh \
-    && ./flashinfer.sh \
     && ./vllm.sh
 
 ENTRYPOINT ["/app/code/venv/bin/vllm", "serve"]
