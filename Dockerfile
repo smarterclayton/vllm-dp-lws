@@ -151,38 +151,9 @@ RUN cd /tmp \
 ENV LD_LIBRARY_PATH=${NIXL_PREFIX}/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}
 ENV NIXL_PLUGIN_DIR=${NIXL_PREFIX}/lib/x86_64-linux-gnu/plugins
 
-# Install UV
-RUN curl -LsSf https://astral.sh/uv/install.sh \
-        | env UV_INSTALL_DIR="/usr/local/bin/" sh
-
-# Squash a warning
-RUN rm /etc/libibverbs.d/vmw_pvrdma.driver
-
-# Grab install scripts
-COPY install-scripts/ /install-scripts/
-RUN chmod +x /install-scripts/*.sh
-
-# Install dependencies & NIXL (python)
-RUN cd /install-scripts \
-    && ./base-deps.sh
-
-# For neovim.appimage
-ENV APPIMAGE_EXTRACT_AND_RUN=1
-
-ENTRYPOINT ["/app/code/venv/bin/vllm", "serve"]
-
-#==============================================================================
-
-FROM base AS deepep
-
 # --- Build and Install NVSHMEM from Source ---
 ENV MPI_HOME=/usr/lib/x86_64-linux-gnu/openmpi
 ENV CPATH=${MPI_HOME}/include:${CPATH}
-
-# First clone DeepEP for its nvshmem patch.
-RUN git clone --depth=1 "https://github.com/deepseek-ai/DeepEP.git" "/app/DeepEP"
-
-# BUILD nvshmem
 RUN export CC=/usr/bin/mpicc CXX=/usr/bin/mpicxx \
     && cd /tmp \
     && wget https://developer.nvidia.com/downloads/assets/secure/nvshmem/nvshmem_src_cuda12-all \
@@ -220,7 +191,31 @@ ENV CPATH=${NVSHMEM_PREFIX}/include:${CPATH}
 ENV LIBRARY_PATH=${NVSHMEM_PREFIX}/lib:${LIBRARY_PATH}
 ENV PKG_CONFIG_PATH=${NVSHMEM_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}
 
-# Install our dependencies
+# Install UV
+RUN curl -LsSf https://astral.sh/uv/install.sh \
+        | env UV_INSTALL_DIR="/usr/local/bin/" sh
+
+# Squash a warning
+RUN rm /etc/libibverbs.d/vmw_pvrdma.driver
+
+# Grab install scripts
+COPY install-scripts/ /install-scripts/
+RUN chmod +x /install-scripts/*.sh
+
+# Install dependencies & NIXL (python)
+RUN cd /install-scripts \
+    && ./base-deps.sh
+
+# For neovim.appimage
+ENV APPIMAGE_EXTRACT_AND_RUN=1
+
+ENTRYPOINT ["/app/code/venv/bin/vllm", "serve"]
+
+#==============================================================================
+
+FROM base AS deepep
+
+# Install latest version of our dependencies
 RUN cd /install-scripts  \
     && ./deepep.sh \
     && ./deepgemm.sh \
