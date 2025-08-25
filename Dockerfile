@@ -222,10 +222,10 @@ ENTRYPOINT ["/app/code/venv/bin/vllm", "serve"]
 
 FROM base AS deepep
 
-# Install latest version of our dependencies
-RUN DEEPEP_COMMIT=26cf250 /install-scripts/deepep.sh \
-    && DEEPGEMM_COMMIT=f85ec64 /install-scripts/deepgemm.sh \
+# Install specific versions
+RUN DEEPEP_COMMIT=26cf250         /install-scripts/deepep.sh \
+    && DEEPGEMM_COMMIT=f85ec64    /install-scripts/deepgemm.sh \
     && FLASHINFER_COMMIT=dd9a3334 /install-scripts/flashinfer.sh \
-    && VLLM_COMMIT=79f05e4436 /install-scripts/vllm.sh
+    && VLLM_COMMIT=e269be2ba2     VLLM_USE_PRECOMPILED=1 /install-scripts/vllm.sh
 
 ENTRYPOINT ["/app/code/venv/bin/vllm", "serve"]
