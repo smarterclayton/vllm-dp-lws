@@ -30,7 +30,10 @@ clone_or_update "${VLLM_REPO_URL}" "${VLLM_SOURCE_DIR}" "${VLLM_BRANCH}" "${VLLM
 banner "Installing vLLM (editable)"
 pushd "${VLLM_SOURCE_DIR}" >/dev/null
 
-export VLLM_USE_PRECOMPILED="${VLLM_USE_PRECOMPILED:-1}"
+# Default to precompiled binaries when on main
+if [[ -z "${VLLM_COMMIT:-}" && "${VLLM_BRANCH}" == "main" && "${VLLM_REPO_URL}" == "https://github.com/vllm-project/vllm.git" ]]; then
+    export VLLM_USE_PRECOMPILED="${VLLM_USE_PRECOMPILED:-1}"
+fi
 
 # TODO(tms): Work around for compressed_tensors bug in vLLM.
 # Remove when no longer needed
