@@ -64,8 +64,8 @@ RUN echo 'tzdata tzdata/Areas select America' | debconf-set-selections \
       # Debugging tools
       kmod pciutils binutils \
       gdb strace lsof \
-      # If we need to debug Python
-      # python3.12-dbg \
+      # We always need to debug python code
+      python3.12-dbg \
       # Should be included for GCP setup, uncomment if they go missing
       libnl-3-200 libnl-route-3-200 \
       # NVSHMEM - disabled due to link errors on DeepEP python package
