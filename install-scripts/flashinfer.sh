@@ -33,7 +33,3 @@ if [[ -n "${FLASHINFER_BRANCH:-}" ]]; then
 else
     upip flashinfer-python
 fi
-
-# Work around https://github.com/vllm-project/vllm/issues/20862 until PyTorch 2.8.0
-"${UV}" pip uninstall --python "${PYTHON}" nvidia-nccl-cu12
-upip nvidia-nccl-cu12==2.26.2.post1
