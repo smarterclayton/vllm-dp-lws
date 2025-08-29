@@ -45,6 +45,7 @@ RUN echo 'tzdata tzdata/Areas select America' | debconf-set-selections \
       python${PYTHON_VERSION} \
       python${PYTHON_VERSION}-dev \
       python${PYTHON_VERSION}-venv \
+      python${PYTHON_VERSION}-dbg \
       ca-certificates \
       htop \
       iputils-ping net-tools \
@@ -64,8 +65,6 @@ RUN echo 'tzdata tzdata/Areas select America' | debconf-set-selections \
       # Debugging tools
       kmod pciutils binutils \
       gdb strace lsof \
-      # We always need to debug python code
-      python3.12-dbg \
       # Should be included for GCP setup, uncomment if they go missing
       libnl-3-200 libnl-route-3-200 \
       # NVSHMEM - disabled due to link errors on DeepEP python package
@@ -224,8 +223,8 @@ FROM base AS deepep
 
 # Install specific versions
 RUN DEEPEP_COMMIT=26cf250         /install-scripts/deepep.sh \
-    && DEEPGEMM_COMMIT=f85ec64    /install-scripts/deepgemm.sh \
+    && DEEPGEMM_COMMIT=ea9c5d92   /install-scripts/deepgemm.sh \
     && FLASHINFER_COMMIT=dd9a3334 /install-scripts/flashinfer.sh \
-    && VLLM_COMMIT=e269be2ba2     VLLM_USE_PRECOMPILED=1 /install-scripts/vllm.sh
+    && VLLM_COMMIT=1cf3753b90     MAX_JOBS=$(( "$(nproc)" * 3 / 4 )) /install-scripts/vllm.sh
 
 ENTRYPOINT ["/app/code/venv/bin/vllm", "serve"]
