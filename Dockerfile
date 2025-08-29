@@ -1,6 +1,6 @@
 # Dockerfile for vLLM development
 # Use a CUDA base image.
-FROM docker.io/nvidia/cuda:12.9.1-devel-ubuntu22.04 AS base
+FROM docker.io/nvidia/cuda:12.8.1-devel-ubuntu22.04 AS base
 
 WORKDIR /app
 
