@@ -223,7 +223,7 @@ FROM base AS deepep
 
 # Install specific versions
 SHELL ["/bin/bash", "-ec"]
-RUN DEEPEP_COMMIT=26cf250         /install-scripts/deepep.sh \
+RUN DEEPEP_COMMIT=9af0e0d0e74     /install-scripts/deepep.sh \
     && DEEPGEMM_COMMIT=ea9c5d92   /install-scripts/deepgemm.sh \
     && /install-scripts/flashinfer.sh \
     && VLLM_BRANCH=releases/v0.10.2 VLLM_USE_PRECOMPILED=0 MAX_JOBS=$(( "$(nproc)" * 3 / 4 )) /install-scripts/vllm.sh
