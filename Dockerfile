@@ -1,10 +1,11 @@
 # Dockerfile for vLLM development
 # Use a CUDA base image.
-FROM docker.io/nvidia/cuda:12.8.1-devel-ubuntu22.04 AS base
+FROM docker.io/nvidia/cuda:12.9.1-devel-ubuntu22.04 AS base
 
 WORKDIR /app
 
 ENV CUDA_MAJOR=12
+ENV CUDA_MINOR=9
 ENV PYTHON_VERSION=3.12
 ENV UCX_VERSION=1.19.0
 ENV UCX_HOME=/opt/ucx
