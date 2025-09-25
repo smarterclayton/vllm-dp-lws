@@ -49,7 +49,7 @@ RUN echo 'tzdata tzdata/Areas select America' | debconf-set-selections \
       python${PYTHON_VERSION}-dbg \
       ca-certificates \
       htop \
-      iputils-ping net-tools \
+      iputils-ping net-tools dnsutils \
       vim ripgrep bat clangd fuse fzf \
       nodejs npm clang fd-find xclip \
       zsh \
