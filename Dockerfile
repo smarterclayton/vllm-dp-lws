@@ -12,9 +12,6 @@ ENV UCX_HOME=/opt/ucx
 ENV CUDA_HOME=/usr/local/cuda/
 ENV GDRCOPY_VERSION=2.4
 ENV GDRCOPY_HOME=/usr/local
-ENV NIXL_VERSION="0.5.0"
-ENV NIXL_SOURCE_DIR=/opt/nixl
-ENV NIXL_PREFIX=/usr/local/nixl
 ENV NVSHMEM_VERSION=3.3.9
 ENV NVSHMEM_PREFIX=/usr/local/nvshmem
 ENV TORCH_CUDA_ARCH_LIST="9.0a 10.0"
@@ -122,39 +119,6 @@ ENV LD_LIBRARY_PATH=${UCX_HOME}/lib:${LD_LIBRARY_PATH}
 ENV CPATH=${UCX_HOME}/include:${CPATH}
 ENV LIBRARY_PATH=${UCX_HOME}/lib:${LIBRARY_PATH}
 ENV PKG_CONFIG_PATH=${UCX_HOME}/lib/pkgconfig:${PKG_CONFIG_PATH}
-
-# --- Build and Install NIXL from Source ---
-# Grab meson from pip, since the 22.04 version of meson is not new enough.
-RUN python${PYTHON_VERSION} -m pip install 'meson>=0.64.0' pybind11 \
-    && cd /tmp \
-    && wget "https://github.com/ai-dynamo/nixl/archive/refs/tags/${NIXL_VERSION}.tar.gz" \
-        -O "nixl-${NIXL_VERSION}.tar.gz" \
-    && mkdir -p ${NIXL_SOURCE_DIR} \
-    && tar --strip-components=1 -xzf "nixl-${NIXL_VERSION}.tar.gz" -C ${NIXL_SOURCE_DIR} \
-    && rm "nixl-${NIXL_VERSION}.tar.gz" \
-    \
-    # create an out-of-source build directory
-    && mkdir -p ${NIXL_SOURCE_DIR}/build \
-    && cd ${NIXL_SOURCE_DIR}/build \
-    \
-    # configure, compile, install
-    && meson setup .. \
-         --prefix=${NIXL_PREFIX} \
-         -Dbuildtype=release \
-    && ninja -j$(nproc) -C . \
-    && ninja -j$(nproc) -C . install \
-    # \
-    # TODO: install wheel later
-    # && cd .. \
-    # source ${VIRTUAL_ENV}/bin/activate && \
-    # python -m build --no-isolation --wheel -o /wheels && \
-    # uv pip install --no-cache-dir . && \
-    # rm -rf build
-    # cleanup
-    && rm -rf ${NIXL_SOURCE_DIR}/build
-
-ENV LD_LIBRARY_PATH=${NIXL_PREFIX}/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}
-ENV NIXL_PLUGIN_DIR=${NIXL_PREFIX}/lib/x86_64-linux-gnu/plugins
 
 # --- Prepare an NVSHMEM directory to support DeepEP compilation ---
 # ENV NVSHMEM_DIR=${NVSHMEM_PREFIX}
