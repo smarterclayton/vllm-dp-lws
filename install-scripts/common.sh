@@ -19,13 +19,13 @@ command -v "${UV}" >/dev/null || { echo "uv not found at ${UV}"; exit 1; }
 banner() { printf '\n========== %s ==========\n' "$*"; }
 
 # Re-usable “uv pip install” wrapper (adds --no-cache-dir by default)
-upip() { "${UV}" pip install --python "${PYTHON}" --no-progress --no-cache-dir --torch-backend=cu128 "$@"; }
+upip() { "${UV}" pip install --python "${PYTHON}" --no-progress --no-cache-dir --torch-backend=cu${CUDA_MAJOR}${CUDA_MINOR} "$@"; }
 
 # Clone the repo if missing, otherwise fast-forward to the requested branch
 clone_or_update() {
   local url=$1 dir=$2 branch=${3:-main} commit=${4:-}
   if [[ -d "${dir}/.git" ]]; then
-    banner "Updating $(basename "${dir}")"
+    banner "Cloning $(basename "${dir}") from ${url} and branch ${branch} (commit: ${commit:-latest})"
     if [[ ! "$(git -C "${dir}" remote get-url origin)" == "${url}" ]]; then
       git -C "${dir}" remote set-url origin "${url}"
     fi

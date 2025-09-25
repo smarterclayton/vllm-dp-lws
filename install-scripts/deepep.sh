@@ -7,16 +7,17 @@ SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" && pwd  )"
 source ${SCRIPT_DIR}/common.sh
 
 DEEPEP_SOURCE_DIR="${DEEPEP_SOURCE_DIR:-/app/deepep}"
-DEEPEP_URL="https://github.com/deepseek-ai/DeepEP"
+DEEPEP_REPO_URL="${DEEPEP_REPO_URL:-https://github.com/deepseek-ai/DeepEP}"
+DEEPEP_BRANCH="${DEEPEP_BRANCH:-}"
+DEEPEP_COMMIT="${DEEPEP_COMMIT:-}"
 
 banner "Environment summary"
-echo "Python version      : ${PYTHON_VERSION}"
-echo "Virtualenv path     : ${VENV_PATH}"
-echo "uv binary           : ${UV}"
-echo "DeepEP repo         : ${DEEPEP_URL}"
+echo "Python version  : ${PYTHON_VERSION}"
+echo "Virtualenv path : ${VENV_PATH}"
+echo "uv binary       : ${UV}"
 echo "====================================================================="
 
-clone_or_update "${DEEPEP_URL}" "${DEEPEP_SOURCE_DIR}"
+clone_or_update "${DEEPEP_REPO_URL}" "${DEEPEP_SOURCE_DIR}" "${DEEPEP_BRANCH}" "${DEEPEP_COMMIT}"
 
 banner "Building and installing DeepEP"
 pushd "${DEEPEP_SOURCE_DIR}" >/dev/null
