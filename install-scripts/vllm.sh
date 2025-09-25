@@ -8,20 +8,15 @@
 SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" && pwd  )"
 source ${SCRIPT_DIR}/common.sh
 
-##############################  configuration  ###############################
-# Locations (override via env if desired)
 VLLM_SOURCE_DIR="${VLLM_SOURCE_DIR:-/app/vllm}"
-
-# Repositories
 VLLM_REPO_URL="${VLLM_REPO_URL:-https://github.com/vllm-project/vllm.git}"
 VLLM_BRANCH="${VLLM_BRANCH:-main}"
+VLLM_COMMIT="${VLLM_COMMIT:-}"
 
 banner "Environment summary"
-echo "Python version      : ${PYTHON_VERSION}"
-echo "Virtualenv path     : ${VENV_PATH}"
-echo "uv binary           : ${UV}"
-echo "vLLM repo / branch  : ${VLLM_REPO_URL}  (${VLLM_BRANCH})"
-echo "vLLM commit         : ${VLLM_COMMIT:-<latest>}"
+echo "Python version  : ${PYTHON_VERSION}"
+echo "Virtualenv path : ${VENV_PATH}"
+echo "uv binary       : ${UV}"
 echo "====================================================================="
 
 ################################  vLLM  ######################################

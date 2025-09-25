@@ -12,10 +12,9 @@ DEEPGEMM_BRANCH="${DEEPGEMM_BRANCH:-}"
 DEEPGEMM_COMMIT="${DEEPGEMM_COMMIT:-}"
 
 banner "Environment summary"
-echo "Python version      : ${PYTHON_VERSION}"
-echo "Virtualenv path     : ${VENV_PATH}"
-echo "uv binary           : ${UV}"
-echo "DeepGEMM repo       : ${DEEPGEMM_REPO_URL}"
+echo "Python version  : ${PYTHON_VERSION}"
+echo "Virtualenv path : ${VENV_PATH}"
+echo "uv binary       : ${UV}"
 echo "====================================================================="
 
 # Dependencies
