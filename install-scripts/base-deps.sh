@@ -31,7 +31,7 @@ banner "Installing base Python deps"
 upip pandas datasets rust-just regex setuptools-scm cmake
 
 banner "Installing NIXL"
-upip "${NIXL_SOURCE_DIR}"
+upip nixl "nvshmem4py-cu${CUDA_MAJOR}" cuda-python
 
 # --------------------------------------------------------------------------
 # Ensure the venv has pip so 'python -m pip' works later (DeepEP build step)
