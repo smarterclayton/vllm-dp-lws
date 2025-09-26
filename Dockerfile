@@ -224,9 +224,9 @@ FROM base AS deepep
 
 # Install specific versions
 SHELL ["/bin/bash", "-ec"]
-RUN DEEPEP_COMMIT=da6ca24ef7 /install-scripts/deepep.sh \
+RUN DEEPEP_REPO_URL=https://github.com/smarterclayton/deepep.git DEEPEP_BRANCH=gcp_tweak /install-scripts/deepep.sh \
     && DEEPGEMM_COMMIT=ea9c5d92 /install-scripts/deepgemm.sh \
     && /install-scripts/flashinfer.sh \
-    && VLLM_USE_PRECOMPILED=0 MAX_JOBS=$(( "$(nproc)" * 3 / 4 )) /install-scripts/vllm.sh
+    && VLLM_REPO_URL=https://github.com/smarterclayton/vllm.git VLLM_BRANCH=gcp_tweak_4 VLLM_USE_PRECOMPILED=0 MAX_JOBS=$(( "$(nproc)" * 3 / 4 )) /install-scripts/vllm.sh
 
 ENTRYPOINT ["/app/code/venv/bin/vllm", "serve"]
