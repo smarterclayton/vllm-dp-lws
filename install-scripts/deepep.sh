@@ -8,7 +8,7 @@ source ${SCRIPT_DIR}/common.sh
 
 DEEPEP_SOURCE_DIR="${DEEPEP_SOURCE_DIR:-/app/deepep}"
 DEEPEP_REPO_URL="${DEEPEP_REPO_URL:-https://github.com/deepseek-ai/DeepEP}"
-DEEPEP_BRANCH="${DEEPEP_BRANCH:-}"
+DEEPEP_BRANCH="${DEEPEP_BRANCH:-main}"
 DEEPEP_COMMIT="${DEEPEP_COMMIT:-}"
 
 banner "Environment summary"
