@@ -174,6 +174,6 @@ RUN curl -LsSf https://astral.sh/uv/install.sh \
     && ./base-deps.sh \
     && DEEPEP_COMMIT=9af0e0d0e74f3577af1979c9b9e1ac2cad0104ee ./deepep.sh \
     && DEEPGEMM_COMMIT=594953acce41793ae00a1233eb516044d604bcb6 ./deepgemm.sh \
-    && VLLM_USE_PRECOMPILED=0 MAX_JOBS=$(( "$(nproc)" * 3 / 4 )) ./vllm.sh
+    && VLLM_BRANCH=releases/v0.11.0 VLLM_USE_PRECOMPILED=0 MAX_JOBS=$(( "$(nproc)" * 3 / 4 )) ./vllm.sh
 
 ENTRYPOINT ["/app/code/venv/bin/vllm", "serve"]
