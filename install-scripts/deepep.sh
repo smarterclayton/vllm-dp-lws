@@ -20,9 +20,10 @@ echo "====================================================================="
 clone_or_update "${DEEPEP_REPO_URL}" "${DEEPEP_SOURCE_DIR}" "${DEEPEP_BRANCH}" "${DEEPEP_COMMIT}"
 
 banner "Building and installing DeepEP"
+set -x
 pushd "${DEEPEP_SOURCE_DIR}" >/dev/null
 # Build + install in one go (pip will make a wheel under the hood)
-NVSHMEM_DIR="${NVSHMEM_PREFIX:-/opt/nvshmem}" \
+NVSHMEM_DIR="${NVSHMEM_DIR:-${NVSHMEM_PREFIX:-/opt/nvshmem}}" \
 "${PYTHON}" -m pip install --no-build-isolation --no-cache-dir .
 # Optional symlink for convenience
 BUILD_DIR="build/lib.linux-$(uname -m)-cpython-${PY_TAG}"
