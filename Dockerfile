@@ -17,7 +17,7 @@ ENV GDRCOPY_VERSION=2.5.1
 ENV GDRCOPY_HOME=/usr/local
 ENV NVSHMEM_VERSION=3.3.20
 ENV NVSHMEM_PREFIX=/usr/local/nvshmem
-ENV TORCH_CUDA_ARCH_LIST="9.0a 10.0"
+ENV TORCH_CUDA_ARCH_LIST="9.0a 10.0+PTX"
 ENV CMAKE_CUDA_ARCHITECTURES="90a;100"
 # Work around https://github.com/vllm-project/vllm/issues/18859 and mount gIB if they
 # are found for NCCL.
