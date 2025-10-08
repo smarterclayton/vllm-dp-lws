@@ -180,17 +180,6 @@ RUN chmod +x /install-scripts/*.sh \
 # For neovim.appimage
 ENV APPIMAGE_EXTRACT_AND_RUN=1
 
-ENTRYPOINT ["/app/code/venv/bin/vllm", "serve"]
-
-#==============================================================================
-
-FROM base AS deepep
-
 # Install specific versions
 SHELL ["/bin/bash", "-ec"]
-RUN DEEPEP_COMMIT=9af0e0d0e74f3577af1979c9b9e1ac2cad0104ee /install-scripts/deepep.sh \
-    && DEEPGEMM_COMMIT=ea9c5d92 /install-scripts/deepgemm.sh \
-    && /install-scripts/flashinfer.sh \
-    && VLLM_USE_PRECOMPILED=0 MAX_JOBS=$(( "$(nproc)" * 3 / 4 )) /install-scripts/vllm.sh
-
-ENTRYPOINT ["/app/code/venv/bin/vllm", "serve"]
+RUN DEEPEP_COMMIT=9af0e0d0e74f3577af1979c9b9e1ac2cad0104ee /install-scripts/deepep.sh
