@@ -14,8 +14,7 @@ ENV GDRCOPY_VERSION=2.4
 ENV GDRCOPY_HOME=/usr/local
 ENV NVSHMEM_VERSION=3.3.20
 ENV NVSHMEM_PREFIX=/usr/local/nvshmem
-ENV TORCH_CUDA_ARCH_LIST="9.0a 10.0"
-ENV CMAKE_CUDA_ARCHITECTURES="90a;100"
+ENV TORCH_BACKEND=cpu
 # Work around https://github.com/vllm-project/vllm/issues/18859 and mount gIB if they
 # are found for NCCL.
 ENV LD_LIBRARY_PATH=/usr/local/gib/lib64:/usr/local/nvidia/lib64:${LD_LIBRARY_PATH}:
@@ -78,95 +77,6 @@ RUN echo 'tzdata tzdata/Areas select America' | debconf-set-selections \
     && python${PYTHON_VERSION} -m ensurepip --upgrade \
     && python${PYTHON_VERSION} -m pip install --upgrade pip setuptools wheel
 
-# --- Build and Install GDRCopy from Source ---
-RUN apt-get update && apt-get install -y check
-RUN cd /tmp && \
-    git clone https://github.com/NVIDIA/gdrcopy.git && \
-    cd gdrcopy && \
-    git checkout tags/v${GDRCOPY_VERSION} && \
-    make prefix=${GDRCOPY_HOME} lib_install exes_install && \
-    ldconfig && \
-    rm -rf /tmp/gdrcopy
-
-ENV PATH=${GDRCOPY_HOME}/bin:${PATH}
-ENV LD_LIBRARY_PATH=${GDRCOPY_HOME}/lib:${LD_LIBRARY_PATH}
-ENV CPATH=${GDRCOPY_HOME}/include:${CPATH}
-ENV LIBRARY_PATH=${GDRCOPY_HOME}/lib:${LIBRARY_PATH}
-
-# --- Build and Install UCX from Source ---
-RUN cd /tmp \
-    && wget https://github.com/openucx/ucx/releases/download/v${UCX_VERSION}/ucx-${UCX_VERSION}.tar.gz \
-    && tar -zxf ucx-${UCX_VERSION}.tar.gz \
-    && cd ucx-${UCX_VERSION} \
-    && ./contrib/configure-release      \
-        --prefix=${UCX_HOME}            \
-        --with-cuda=${CUDA_HOME}        \
-        --with-gdrcopy=${GDRCOPY_HOME}  \
-        --enable-shared         \
-        --disable-static        \
-        --disable-doxygen-doc   \
-        --enable-optimizations  \
-        --enable-cma            \ 
-        --enable-devel-headers  \
-        --with-verbs            \
-        --with-dm               \ 
-        --enable-mt             \
-    && make -j$(nproc) && make install-strip \
-    && rm -rf /tmp/ucx-${UCX_VERSION}*
-
-ENV PATH=${UCX_HOME}/bin:${PATH}
-ENV LD_LIBRARY_PATH=${UCX_HOME}/lib:${LD_LIBRARY_PATH}
-ENV CPATH=${UCX_HOME}/include:${CPATH}
-ENV LIBRARY_PATH=${UCX_HOME}/lib:${LIBRARY_PATH}
-ENV PKG_CONFIG_PATH=${UCX_HOME}/lib/pkgconfig:${PKG_CONFIG_PATH}
-
-# --- Prepare an NVSHMEM directory to support DeepEP compilation ---
-# ENV NVSHMEM_DIR=${NVSHMEM_PREFIX}
-# RUN mkdir -p "${NVSHMEM_DIR}/include" \
-#     && cp -R /usr/include/nvshmem_${CUDA_MAJOR}/* "${NVSHMEM_DIR}/include/"
-# TODO: Generates link errors like:
-#       nvlink error   : Undefined reference to 'nvshmemi_ibgda_device_state_d' in '/app/deepep/build/temp.linux-x86_64-cpython-312/csrc/kernels/internode.o' (target: sm_100)
-
-# --- Build and Install NVSHMEM from Source ---
-ENV MPI_HOME=/usr/lib/x86_64-linux-gnu/openmpi
-ENV CPATH=${MPI_HOME}/include:${CPATH}
-RUN export CC=/usr/bin/mpicc CXX=/usr/bin/mpicxx \
-    && cd /tmp \
-    && wget https://developer.download.nvidia.com/compute/redist/nvshmem/${NVSHMEM_VERSION}/source/nvshmem_src_cuda${CUDA_MAJOR}-all-all-${NVSHMEM_VERSION}.tar.gz \
-    && tar -xzf nvshmem_src_cuda${CUDA_MAJOR}-all-all-${NVSHMEM_VERSION}.tar.gz \
-    && cd nvshmem_src \
-    && mkdir -p build \
-    && cd build \
-    && cmake \
-      -G Ninja \
-      -DNVSHMEM_PREFIX=${NVSHMEM_PREFIX} \
-      -DCMAKE_CUDA_ARCHITECTURES=${CMAKE_CUDA_ARCHITECTURES} \
-      -DNVSHMEM_PMIX_SUPPORT=0           \
-      -DNVSHMEM_LIBFABRIC_SUPPORT=0      \
-      -DNVSHMEM_IBRC_SUPPORT=1           \
-      -DNVSHMEM_IBGDA_SUPPORT=1          \
-      -DNVSHMEM_IBDEVX_SUPPORT=1         \
-      -DNVSHMEM_SHMEM_SUPPORT=0          \
-      -DNVSHMEM_USE_GDRCOPY=1            \
-      -DNVSHMEM_USE_NCCL=0               \
-      -DNVSHMEM_BUILD_TESTS=1            \
-      -DNVSHMEM_BUILD_EXAMPLES=0         \
-      -DNVSHMEM_TIMEOUT_DEVICE_POLLING=0 \
-      -DLIBFABRIC_HOME=/usr              \
-      -DGDRCOPY_HOME=${GDRCOPY_HOME}     \
-      -DNVSHMEM_MPI_SUPPORT=1            \
-      -DNVSHMEM_DISABLE_CUDA_VMM=1       \
-      .. \
-    && ninja -j$(nproc) \
-    && ninja -j$(nproc) install \
-    && rm -rf /tmp/nvshmem_src*
-
-ENV PATH=${NVSHMEM_PREFIX}/bin:${PATH}
-ENV LD_LIBRARY_PATH=${NVSHMEM_PREFIX}/lib:${LD_LIBRARY_PATH}
-ENV CPATH=${NVSHMEM_PREFIX}/include:${CPATH}
-ENV LIBRARY_PATH=${NVSHMEM_PREFIX}/lib:${LIBRARY_PATH}
-ENV PKG_CONFIG_PATH=${NVSHMEM_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}
-
 # Install UV
 RUN curl -LsSf https://astral.sh/uv/install.sh \
         | env UV_INSTALL_DIR="/usr/local/bin/" sh
@@ -188,9 +98,6 @@ FROM base AS deepep
 
 # Install specific versions
 SHELL ["/bin/bash", "-ec"]
-RUN DEEPEP_COMMIT=9af0e0d0e74f3577af1979c9b9e1ac2cad0104ee /install-scripts/deepep.sh \
-    && DEEPGEMM_COMMIT=ea9c5d92 /install-scripts/deepgemm.sh \
-    && /install-scripts/flashinfer.sh \
-    && VLLM_USE_PRECOMPILED=0 MAX_JOBS=$(( "$(nproc)" * 3 / 4 )) /install-scripts/vllm.sh
+RUN CMAKE_DISABLE_FIND_PACKAGE_CUDA=ON VLLM_TARGET_DEVICE=cpu VLLM_USE_PRECOMPILED=0 MAX_JOBS=$(( "$(nproc)" * 3 / 4 )) /install-scripts/vllm.sh
 
 ENTRYPOINT ["/app/code/venv/bin/vllm", "serve"]

@@ -19,7 +19,7 @@ command -v "${UV}" >/dev/null || { echo "uv not found at ${UV}"; exit 1; }
 banner() { printf '\n========== %s ==========\n' "$*"; }
 
 # Re-usable “uv pip install” wrapper (adds --no-cache-dir by default)
-upip() { "${UV}" pip install --python "${PYTHON}" --no-progress --no-cache-dir --torch-backend=cu${CUDA_MAJOR}${CUDA_MINOR} "$@"; }
+upip() { "${UV}" pip install --python "${PYTHON}" --no-progress --no-cache-dir --torch-backend=${TORCH_BACKEND} "$@"; }
 
 # Clone the repo if missing, otherwise fast-forward to the requested branch
 clone_or_update() {
