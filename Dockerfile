@@ -149,7 +149,7 @@ RUN export CC=/usr/bin/mpicc CXX=/usr/bin/mpicxx \
       -DNVSHMEM_SHMEM_SUPPORT=0          \
       -DNVSHMEM_USE_GDRCOPY=1            \
       -DNVSHMEM_USE_NCCL=0               \
-      -DNVSHMEM_BUILD_TESTS=1            \
+      -DNVSHMEM_BUILD_TESTS=0            \
       -DNVSHMEM_BUILD_EXAMPLES=0         \
       -DNVSHMEM_TIMEOUT_DEVICE_POLLING=0 \
       -DLIBFABRIC_HOME=/usr              \
