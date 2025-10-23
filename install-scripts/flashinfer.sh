@@ -31,5 +31,5 @@ if [[ -n "${FLASHINFER_BRANCH:-}" ]]; then
     upip -e . --no-build-isolation
     popd >/dev/null
 else
-    upip flashinfer-python
+    upip flashinfer-python==${FLASHINFER_VERSION:-v0.3.1}
 fi
