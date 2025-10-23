@@ -32,9 +32,10 @@ fi
 
 # TODO(tms): Work around for compressed_tensors bug in vLLM.
 # Remove when no longer needed
-upip accelerate
+# upip accelerate
 
-upip -e .
+# Set --prerelease=allow to get flashinfer 0.4.1 (which references apache-tvm-ffi at a prerelease)
+upip --prerelease=allow -e .
 
 popd >/dev/null
 
