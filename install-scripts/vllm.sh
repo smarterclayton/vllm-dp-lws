@@ -37,6 +37,9 @@ fi
 # Set --prerelease=allow to get flashinfer 0.4.1 (which references apache-tvm-ffi at a prerelease)
 upip --prerelease=allow -e .
 
+# "unable to create AH" from NVSHMEM when nvidia-nvshmem-cu12 is installed (torch brings this in)
+"${UV}" pip uninstall nvidia-nvshmem-cu12
+
 popd >/dev/null
 
 banner "vLLM is ready"
