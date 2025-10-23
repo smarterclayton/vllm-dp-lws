@@ -189,7 +189,7 @@ FROM base AS deepep
 # Install specific versions
 SHELL ["/bin/bash", "-ec"]
 RUN DEEPEP_COMMIT=9af0e0d0e74f3577af1979c9b9e1ac2cad0104ee /install-scripts/deepep.sh \
-    && DEEPGEMM_COMMIT=ea9c5d92 /install-scripts/deepgemm.sh \
+    && DEEPGEMM_COMMIT=594953acce41793ae00a1233eb516044d604bcb6 /install-scripts/deepgemm.sh \
     && VLLM_USE_PRECOMPILED=0 MAX_JOBS=$(( "$(nproc)" * 3 / 4 )) /install-scripts/vllm.sh
 
 ENTRYPOINT ["/app/code/venv/bin/vllm", "serve"]
