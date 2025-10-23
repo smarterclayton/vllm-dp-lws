@@ -55,7 +55,7 @@ RUN echo 'tzdata tzdata/Areas select America' | debconf-set-selections \
       autoconf automake libtool pkg-config \
       ninja-build cmake \
       # Other dependencies
-      libnuma1 libsubunit0 libpci-dev libibverbs-dev \
+      libnuma1 libsubunit0 libpci-dev \
       # MPI / PMIx / libfabric for NVSHMEM
       libopenmpi-dev openmpi-bin \
       libpmix-dev libfabric-dev \
@@ -167,29 +167,20 @@ ENV CPATH=${NVSHMEM_PREFIX}/include:${CPATH}
 ENV LIBRARY_PATH=${NVSHMEM_PREFIX}/lib:${LIBRARY_PATH}
 ENV PKG_CONFIG_PATH=${NVSHMEM_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}
 
-# Install UV
-RUN curl -LsSf https://astral.sh/uv/install.sh \
-        | env UV_INSTALL_DIR="/usr/local/bin/" sh
-
-# Install dependencies and NIXL (python)
-COPY install-scripts/ /install-scripts/
-RUN chmod +x /install-scripts/*.sh \
-    && cd /install-scripts \
-    && ./base-deps.sh
-
-# For neovim.appimage
 ENV APPIMAGE_EXTRACT_AND_RUN=1
 
-ENTRYPOINT ["/app/code/venv/bin/vllm", "serve"]
-
-#==============================================================================
-
-FROM base AS deepep
-
-# Install specific versions
 SHELL ["/bin/bash", "-ec"]
-RUN DEEPEP_COMMIT=9af0e0d0e74f3577af1979c9b9e1ac2cad0104ee /install-scripts/deepep.sh \
-    && DEEPGEMM_COMMIT=594953acce41793ae00a1233eb516044d604bcb6 /install-scripts/deepgemm.sh \
-    && VLLM_USE_PRECOMPILED=0 MAX_JOBS=$(( "$(nproc)" * 3 / 4 )) /install-scripts/vllm.sh
+COPY install-scripts/ /install-scripts/
+
+# Install UV
+RUN curl -LsSf https://astral.sh/uv/install.sh \
+        | env UV_INSTALL_DIR="/usr/local/bin/" sh \
+    # Install dependencies and NIXL (python)
+    && chmod +x /install-scripts/*.sh \
+    && cd /install-scripts \
+    && ./base-deps.sh \
+    && DEEPEP_COMMIT=9af0e0d0e74f3577af1979c9b9e1ac2cad0104ee ./deepep.sh \
+    && DEEPGEMM_COMMIT=594953acce41793ae00a1233eb516044d604bcb6 ./deepgemm.sh \
+    && VLLM_USE_PRECOMPILED=0 MAX_JOBS=$(( "$(nproc)" * 3 / 4 )) ./vllm.sh
 
 ENTRYPOINT ["/app/code/venv/bin/vllm", "serve"]
