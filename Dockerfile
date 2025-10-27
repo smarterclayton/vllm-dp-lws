@@ -13,7 +13,7 @@ ENV CUDA_HOME=/usr/local/cuda/
 ENV GDRCOPY_VERSION=2.4
 ENV GDRCOPY_HOME=/usr/local
 ENV NVSHMEM_VERSION=3.3.20
-ENV NVSHMEM_PREFIX=/usr/local/nvshmem
+ENV NVSHMEM_DIR=/usr/local/nvshmem
 ENV TORCH_CUDA_ARCH_LIST="9.0a 10.0"
 ENV CMAKE_CUDA_ARCHITECTURES="90a;100"
 # Work around https://github.com/vllm-project/vllm/issues/18859 and mount gIB if they
@@ -120,13 +120,6 @@ ENV CPATH=${UCX_HOME}/include:${CPATH}
 ENV LIBRARY_PATH=${UCX_HOME}/lib:${LIBRARY_PATH}
 ENV PKG_CONFIG_PATH=${UCX_HOME}/lib/pkgconfig:${PKG_CONFIG_PATH}
 
-# --- Prepare an NVSHMEM directory to support DeepEP compilation ---
-# ENV NVSHMEM_DIR=${NVSHMEM_PREFIX}
-# RUN mkdir -p "${NVSHMEM_DIR}/include" \
-#     && cp -R /usr/include/nvshmem_${CUDA_MAJOR}/* "${NVSHMEM_DIR}/include/"
-# TODO: Generates link errors like:
-#       nvlink error   : Undefined reference to 'nvshmemi_ibgda_device_state_d' in '/app/deepep/build/temp.linux-x86_64-cpython-312/csrc/kernels/internode.o' (target: sm_100)
-
 # --- Build and Install NVSHMEM from Source ---
 ENV MPI_HOME=/usr/lib/x86_64-linux-gnu/openmpi
 ENV CPATH=${MPI_HOME}/include:${CPATH}
@@ -139,7 +132,7 @@ RUN export CC=/usr/bin/mpicc CXX=/usr/bin/mpicxx \
     && cd build \
     && cmake \
       -G Ninja \
-      -DNVSHMEM_PREFIX=${NVSHMEM_PREFIX} \
+      -DNVSHMEM_PREFIX=${NVSHMEM_DIR} \
       -DCMAKE_CUDA_ARCHITECTURES=${CMAKE_CUDA_ARCHITECTURES} \
       -DNVSHMEM_PMIX_SUPPORT=0           \
       -DNVSHMEM_LIBFABRIC_SUPPORT=0      \
@@ -161,11 +154,11 @@ RUN export CC=/usr/bin/mpicc CXX=/usr/bin/mpicxx \
     && ninja -j$(nproc) install \
     && rm -rf /tmp/nvshmem_src*
 
-ENV PATH=${NVSHMEM_PREFIX}/bin:${PATH}
-ENV LD_LIBRARY_PATH=${NVSHMEM_PREFIX}/lib:${LD_LIBRARY_PATH}
-ENV CPATH=${NVSHMEM_PREFIX}/include:${CPATH}
-ENV LIBRARY_PATH=${NVSHMEM_PREFIX}/lib:${LIBRARY_PATH}
-ENV PKG_CONFIG_PATH=${NVSHMEM_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}
+ENV PATH=${NVSHMEM_DIR}/bin:${PATH}
+ENV LD_LIBRARY_PATH=${NVSHMEM_DIR}/lib:${LD_LIBRARY_PATH}
+ENV CPATH=${NVSHMEM_DIR}/include:${CPATH}
+ENV LIBRARY_PATH=${NVSHMEM_DIR}/lib:${LIBRARY_PATH}
+ENV PKG_CONFIG_PATH=${NVSHMEM_DIR}/lib/pkgconfig:${PKG_CONFIG_PATH}
 
 ENV APPIMAGE_EXTRACT_AND_RUN=1
 
