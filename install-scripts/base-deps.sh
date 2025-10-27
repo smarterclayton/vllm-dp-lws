@@ -33,7 +33,7 @@ upip pandas datasets rust-just regex setuptools-scm cmake
 banner "Installing NIXL"
 upip nixl cuda-python
 
-if [[ "${NVSHMEM_DIR}" != "" ]] && wheel="$( ls "${NVSHMEM_DIR}"/lib/python/dist/nvshmem4py_cu"${CUDA_MAJOR}"-*-cp"${PYTHON_VERSION/./}"-cp"${PYTHON_VERSION/./}"-manylinux_*.whl | head -1 )"; then
+if [[ "${NVSHMEM_DIR-}" != "" ]] && wheel="$( ls "${NVSHMEM_DIR}"/lib/python/dist/nvshmem4py_cu"${CUDA_MAJOR}"-*-cp"${PYTHON_VERSION/./}"-cp"${PYTHON_VERSION/./}"-manylinux_*.whl | head -1 )"; then
     banner "Installing nvshmem4py from source build"
     upip "${wheel}"
 fi
