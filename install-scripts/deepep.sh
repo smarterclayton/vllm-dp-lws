@@ -23,7 +23,9 @@ banner "Building and installing DeepEP"
 set -x
 pushd "${DEEPEP_SOURCE_DIR}" >/dev/null
 # Build + install in one go (pip will make a wheel under the hood)
-NVSHMEM_DIR="${NVSHMEM_DIR:-${NVSHMEM_PREFIX:-/opt/nvshmem}}" \
+if [[ "${NVSHMEM_DIR}" != "" ]]; then
+    echo "Using NVSHMEM_DIR=${NVSHMEM_DIR}"
+fi
 "${PYTHON}" -m pip install --no-build-isolation --no-cache-dir .
 # Optional symlink for convenience
 BUILD_DIR="build/lib.linux-$(uname -m)-cpython-${PY_TAG}"
