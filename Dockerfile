@@ -169,7 +169,7 @@ RUN curl -LsSf https://astral.sh/uv/install.sh \
     && chmod +x /install-scripts/*.sh \
     && cd /install-scripts \
     && ./base-deps.sh \
-    && DEEPEP_COMMIT=9af0e0d0e74f3577af1979c9b9e1ac2cad0104ee ./deepep.sh \
+    && DEEPEP_REPO_URL=https://github.com/smarterclayton/DeepEP.git DEEPEP_BRANCH=nic_pe_alignment ./deepep.sh \
     && DEEPGEMM_COMMIT=594953acce41793ae00a1233eb516044d604bcb6 ./deepgemm.sh \
     && VLLM_USE_PRECOMPILED=0 MAX_JOBS=$(( "$(nproc)" * 3 / 4 )) ./vllm.sh
 
