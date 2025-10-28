@@ -34,8 +34,8 @@ RUN echo 'tzdata tzdata/Areas select America' | debconf-set-selections \
     #&& wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb \
     #&& dpkg -i cuda-keyring_1.1-1_all.deb \
     # Mellanox OFED
-    && wget -qO - https://www.mellanox.com/downloads/ofed/RPM-GPG-KEY-Mellanox | apt-key add - \
-    && cd /etc/apt/sources.list.d/ && wget https://linux.mellanox.com/public/repo/mlnx_ofed/24.10-0.7.0.0/ubuntu22.04/mellanox_mlnx_ofed.list \
+    #&& wget -qO - https://www.mellanox.com/downloads/ofed/RPM-GPG-KEY-Mellanox | apt-key add - \
+    #&& cd /etc/apt/sources.list.d/ && wget https://linux.mellanox.com/public/repo/mlnx_ofed/24.10-0.7.0.0/ubuntu22.04/mellanox_mlnx_ofed.list \
     # Update all
     && apt-get -qq update \
     && apt-get -qq install -y --no-install-recommends \
