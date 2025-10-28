@@ -12,8 +12,6 @@ ENV UCX_HOME=/opt/ucx
 ENV CUDA_HOME=/usr/local/cuda/
 ENV GDRCOPY_VERSION=2.4
 ENV GDRCOPY_HOME=/usr/local
-ENV NVSHMEM_VERSION=3.3.20
-ENV NVSHMEM_DIR=/usr/local/nvshmem
 ENV TORCH_CUDA_ARCH_LIST="9.0a 10.0"
 ENV CMAKE_CUDA_ARCHITECTURES="90a;100"
 # Work around https://github.com/vllm-project/vllm/issues/18859 and mount gIB if they
@@ -62,10 +60,10 @@ RUN echo 'tzdata tzdata/Areas select America' | debconf-set-selections \
       gdb strace lsof \
       # Should be included for GCP setup, uncomment if they go missing
       libnl-3-200 libnl-route-3-200 \
-      # NVSHMEM - disabled due to link errors on DeepEP python package
-      # nvshmem-cuda-${CUDA_MAJOR} \
-      # Allow NVSHMEM to build nvshmem4py
-      python3.10-venv python3.10-dev \
+      # NVSHMEM
+      libnvshmem3-cuda-${CUDA_MAJOR} libnvshmem3-dev-cuda-${CUDA_MAJOR} libnvshmem3-static-cuda-${CUDA_MAJOR} \
+      # GDRCopy
+      check \
       # Mellanox OFED
       ibverbs-utils libibverbs-dev libibumad3 libibumad-dev librdmacm-dev rdmacm-utils infiniband-diags ibverbs-utils \
     && apt-get clean \
@@ -75,8 +73,10 @@ RUN echo 'tzdata tzdata/Areas select America' | debconf-set-selections \
     && python${PYTHON_VERSION} -m ensurepip --upgrade \
     && python${PYTHON_VERSION} -m pip install --upgrade pip setuptools wheel
 
+# --- Set NVSHMEM required environment ---
+ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/lib/x86_64-linux-gnu/nvshmem/${CUDA_MAJOR}
+
 # --- Build and Install GDRCopy from Source ---
-RUN apt-get update && apt-get install -y check
 RUN cd /tmp && \
     git clone https://github.com/NVIDIA/gdrcopy.git && \
     cd gdrcopy && \
@@ -116,46 +116,6 @@ ENV LD_LIBRARY_PATH=${UCX_HOME}/lib:${LD_LIBRARY_PATH}
 ENV CPATH=${UCX_HOME}/include:${CPATH}
 ENV LIBRARY_PATH=${UCX_HOME}/lib:${LIBRARY_PATH}
 ENV PKG_CONFIG_PATH=${UCX_HOME}/lib/pkgconfig:${PKG_CONFIG_PATH}
-
-# --- Build and Install NVSHMEM from Source ---
-ENV MPI_HOME=/usr/lib/x86_64-linux-gnu/openmpi
-ENV CPATH=${MPI_HOME}/include:${CPATH}
-RUN export CC=/usr/bin/mpicc CXX=/usr/bin/mpicxx \
-    && cd /tmp \
-    && wget https://developer.download.nvidia.com/compute/redist/nvshmem/${NVSHMEM_VERSION}/source/nvshmem_src_cuda${CUDA_MAJOR}-all-all-${NVSHMEM_VERSION}.tar.gz \
-    && tar -xzf nvshmem_src_cuda${CUDA_MAJOR}-all-all-${NVSHMEM_VERSION}.tar.gz \
-    && cd nvshmem_src \
-    && mkdir -p build \
-    && cd build \
-    && cmake \
-      -G Ninja \
-      -DNVSHMEM_PREFIX=${NVSHMEM_DIR} \
-      -DCMAKE_CUDA_ARCHITECTURES=${CMAKE_CUDA_ARCHITECTURES} \
-      -DNVSHMEM_PMIX_SUPPORT=0           \
-      -DNVSHMEM_LIBFABRIC_SUPPORT=0      \
-      -DNVSHMEM_IBRC_SUPPORT=1           \
-      -DNVSHMEM_IBGDA_SUPPORT=1          \
-      -DNVSHMEM_IBDEVX_SUPPORT=1         \
-      -DNVSHMEM_SHMEM_SUPPORT=0          \
-      -DNVSHMEM_USE_GDRCOPY=1            \
-      -DNVSHMEM_USE_NCCL=0               \
-      -DNVSHMEM_BUILD_TESTS=0            \
-      -DNVSHMEM_BUILD_EXAMPLES=0         \
-      -DNVSHMEM_TIMEOUT_DEVICE_POLLING=0 \
-      -DLIBFABRIC_HOME=/usr              \
-      -DGDRCOPY_HOME=${GDRCOPY_HOME}     \
-      -DNVSHMEM_MPI_SUPPORT=1            \
-      -DNVSHMEM_DISABLE_CUDA_VMM=1       \
-      .. \
-    && ninja -j$(nproc) \
-    && ninja -j$(nproc) install \
-    && rm -rf /tmp/nvshmem_src*
-
-ENV PATH=${NVSHMEM_DIR}/bin:${PATH}
-ENV LD_LIBRARY_PATH=${NVSHMEM_DIR}/lib:${LD_LIBRARY_PATH}
-ENV CPATH=${NVSHMEM_DIR}/include:${CPATH}
-ENV LIBRARY_PATH=${NVSHMEM_DIR}/lib:${LIBRARY_PATH}
-ENV PKG_CONFIG_PATH=${NVSHMEM_DIR}/lib/pkgconfig:${PKG_CONFIG_PATH}
 
 ENV APPIMAGE_EXTRACT_AND_RUN=1
 
