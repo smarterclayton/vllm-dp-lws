@@ -171,6 +171,6 @@ RUN curl -LsSf https://astral.sh/uv/install.sh \
     && ./base-deps.sh \
     && DEEPEP_REPO_URL=https://github.com/smarterclayton/DeepEP.git DEEPEP_BRANCH=nic_pe_alignment ./deepep.sh \
     && DEEPGEMM_COMMIT=594953acce41793ae00a1233eb516044d604bcb6 ./deepgemm.sh \
-    && VLLM_USE_PRECOMPILED=0 MAX_JOBS=$(( "$(nproc)" * 3 / 4 )) ./vllm.sh
+    && VLLM_REPO_URL=https://github.com/smarterclayton/vllm.git VLLM_BRANCH=all_fixes VLLM_USE_PRECOMPILED=0 MAX_JOBS=$(( "$(nproc)" * 3 / 4 )) ./vllm.sh
 
 ENTRYPOINT ["/app/code/venv/bin/vllm", "serve"]
