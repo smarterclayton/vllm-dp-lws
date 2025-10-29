@@ -1,24 +1,23 @@
-# Dockerfile for vLLM development
+# Build and runtime environment for vLLM with necessary libraries for distributed inference
+
 # Use a CUDA base image.
 FROM docker.io/nvidia/cuda:12.9.1-devel-ubuntu22.04 AS base
 
-WORKDIR /app
-
 ENV CUDA_MAJOR=12
 ENV CUDA_MINOR=9
+ENV CUDA_PATCH=1
+ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHON_VERSION=3.12
 ENV UCX_VERSION=1.19.0
 ENV UCX_HOME=/opt/ucx
 ENV CUDA_HOME=/usr/local/cuda/
-ENV GDRCOPY_VERSION=2.4
-ENV GDRCOPY_HOME=/usr/local
 ENV TORCH_CUDA_ARCH_LIST="9.0a 10.0"
 ENV CMAKE_CUDA_ARCHITECTURES="90a;100"
 # Work around https://github.com/vllm-project/vllm/issues/18859 and mount gIB if they
 # are found for NCCL.
 ENV LD_LIBRARY_PATH=/usr/local/gib/lib64:/usr/local/nvidia/lib64:${LD_LIBRARY_PATH}:
 
-ENV DEBIAN_FRONTEND=noninteractive
+WORKDIR /app
 
 RUN echo 'tzdata tzdata/Areas select America' | debconf-set-selections \
     && echo 'tzdata tzdata/Zones/America select New_York' | debconf-set-selections \
@@ -76,49 +75,6 @@ RUN echo 'tzdata tzdata/Areas select America' | debconf-set-selections \
 # --- Set NVSHMEM required environment ---
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/lib/x86_64-linux-gnu/nvshmem/${CUDA_MAJOR}
 
-# --- Build and Install GDRCopy from Source ---
-RUN cd /tmp && \
-    git clone https://github.com/NVIDIA/gdrcopy.git && \
-    cd gdrcopy && \
-    git checkout tags/v${GDRCOPY_VERSION} && \
-    make prefix=${GDRCOPY_HOME} lib_install exes_install && \
-    ldconfig && \
-    rm -rf /tmp/gdrcopy
-
-ENV PATH=${GDRCOPY_HOME}/bin:${PATH}
-ENV LD_LIBRARY_PATH=${GDRCOPY_HOME}/lib:${LD_LIBRARY_PATH}
-ENV CPATH=${GDRCOPY_HOME}/include:${CPATH}
-ENV LIBRARY_PATH=${GDRCOPY_HOME}/lib:${LIBRARY_PATH}
-
-# --- Build and Install UCX from Source ---
-RUN cd /tmp \
-    && wget https://github.com/openucx/ucx/releases/download/v${UCX_VERSION}/ucx-${UCX_VERSION}.tar.gz \
-    && tar -zxf ucx-${UCX_VERSION}.tar.gz \
-    && cd ucx-${UCX_VERSION} \
-    && ./contrib/configure-release      \
-        --prefix=${UCX_HOME}            \
-        --with-cuda=${CUDA_HOME}        \
-        --with-gdrcopy=${GDRCOPY_HOME}  \
-        --enable-shared         \
-        --disable-static        \
-        --disable-doxygen-doc   \
-        --enable-optimizations  \
-        --enable-cma            \ 
-        --enable-devel-headers  \
-        --with-verbs            \
-        --with-dm               \ 
-        --enable-mt             \
-    && make -j$(nproc) && make install-strip \
-    && rm -rf /tmp/ucx-${UCX_VERSION}*
-
-ENV PATH=${UCX_HOME}/bin:${PATH}
-ENV LD_LIBRARY_PATH=${UCX_HOME}/lib:${LD_LIBRARY_PATH}
-ENV CPATH=${UCX_HOME}/include:${CPATH}
-ENV LIBRARY_PATH=${UCX_HOME}/lib:${LIBRARY_PATH}
-ENV PKG_CONFIG_PATH=${UCX_HOME}/lib/pkgconfig:${PKG_CONFIG_PATH}
-
-ENV APPIMAGE_EXTRACT_AND_RUN=1
-
 SHELL ["/bin/bash", "-ec"]
 COPY install-scripts/ /install-scripts/
 
@@ -129,8 +85,4 @@ RUN curl -LsSf https://astral.sh/uv/install.sh \
     && chmod +x /install-scripts/*.sh \
     && cd /install-scripts \
     && ./base-deps.sh \
-    && DEEPEP_REPO_URL=https://github.com/smarterclayton/DeepEP.git DEEPEP_BRANCH=nic_pe_alignment ./deepep.sh \
-    && DEEPGEMM_COMMIT=594953acce41793ae00a1233eb516044d604bcb6 ./deepgemm.sh \
-    && VLLM_USE_PRECOMPILED=0 MAX_JOBS=$(( "$(nproc)" * 3 / 4 )) ./vllm.sh
-
-ENTRYPOINT ["/app/code/venv/bin/vllm", "serve"]
+    && DEEPEP_REPO_URL=https://github.com/smarterclayton/DeepEP.git DEEPEP_BRANCH=nic_pe_alignment ./deepep.sh
